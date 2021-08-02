@@ -1,0 +1,497 @@
+---
+title: \textcolor{TIBAORANGE}{COVID-19 situation report for WHO Africa Region}
+subtitle: \textcolor{TIBAORANGE}{`r format(Sys.Date(), "%d/%m/%Y")`}
+author: \textcolor{TIBARED}{Produced by the TIBA COVID-19 Pandemic Response Unit}
+header-includes:      
+    - \usepackage{fancyhdr}
+    - \usepackage{geometry}
+    - \pagestyle{fancy}
+    - \usepackage{color}
+    - \definecolor{TIBAORANGE}{RGB}{197,90,23}
+    - \definecolor{TIBARED}{RGB}{140,24,23}
+    - \fancyfoot[CO,CE]{\textcolor{TIBAORANGE}{NIHR Global Health Research Unit Tackling Infections to Benefit Africa 
+                                               at the University of Edinburgh}}
+    - \usepackage{float}
+    - \floatplacement{figure}{H}
+    - \usepackage{pdflscape}
+    - \newcommand{\blandscape}{\begin{landscape}}
+    - \newcommand{\elandscape}{\end{landscape}}   
+    - \newcommand{\ssubsection}[1]{\subsection[#1]{\centering\Huge {#1}}}
+
+
+output:
+ pdf_document: default
+extra_dependencies: float
+---
+
+\addtolength{\headheight}{1cm}
+\pagestyle{fancyplain}
+\rhead{\includegraphics[width=0.2\textwidth]{../input_files/tiba_logo}}
+\lhead{}
+\renewcommand{\headrulewidth}{0pt}
+
+```{r setup, include=FALSE}
+
+
+# SET UP CHUNK OPTIONS ---
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(tidy = TRUE)
+knitr::opts_chunk$set(message=FALSE)
+
+
+today <- Sys.Date()
+library(plyr)
+library(knitr)
+library(kableExtra)
+library(stringr)
+library(ggplot2)
+library(cowplot)
+library(toOrdinal)
+library(tidyverse)
+load(paste0('../output/WHO_report_analysis_', as.character(today), '.RData'))
+source('../script/sourced_functions_Weekly_Ratio_reports.R')
+
+
+```
+&nbsp;
+&nbsp;
+```{r map, fig.align = 'center', out.width= "100%"}
+knitr::include_graphics("../input_files/covid-19_africa_map.png")
+```
+
+\newpage
+
+\addtolength{\headheight}{-1.5cm}
+\pagestyle{fancyplain}
+\rhead{}
+\lhead{}
+\pagestyle{fancy}
+\fancyfoot[CO,CE]{\textcolor{TIBAORANGE}{}}
+
+\newpage
+&nbsp;
+ 
+&nbsp;
+
+\fancyfoot[c]{\thepage}
+ 
+\tableofcontents
+\addtocontents{toc}{\smallskip (Click to access)\par}
+
+\newpage
+
+
+# Section 1: Overview of WHO Africa Region `r format(today, "%d/%m/%Y")`
+## Overview
+ 
+```{r mapWHO, fig.align = 'center', out.width= "80%"}
+knitr::include_graphics("../input_files/WHO_Africa3.png")
+```
+&nbsp;
+ 
+&nbsp;
+
+```{r mapWHOepicurve,,fig.align='center', out.width= "90%"}
+knitr::include_graphics("../input_files/WHO_Africa_epicurve.png")
+```
+
+\newpage
+
+## Methods
+
+We compare the size and rate of increase of the COVID-19 epidemic across the countries included in WHO Africa Region.  
+&nbsp;
+ 
+
+The maps below summarise the in-country situations:  
+&nbsp;
+ 
+* Top row: cumulative reported cases (left) and deaths (right).  
+* Middle row: cumulative reported cases (left) and deaths (right) per 10,000 population on a log10 scale.  
+* Bottom row: weekly ratios for new cases and new deaths. The higher the weekly ratio, the faster an epidemic is growing. A weekly ratio of 1 represents stable growth (i.e. the number of cases or deaths in the past 7 days was the same as the 7 days before). A value between 1 and 0 indicates that an epidemic is in decline. These maps show weekly rations on a single date and may not be indicative of long term trends. See methods for more details. 
+
+Caveats: 
+
+* Colour scales are non-linear and are re-calibrated every week.
+
+* WHO African region countries shaded in white either have no reported deaths/cases or, for weekly ratio calculations, have reduced their cumulative total cases/deaths in the last 14 days due to retrospective changes in reporting procedures.
+
+* Doubling times have been replaced by weekly ratios because some countries are moving out of the exponential phase of the epidemic.
+
+## Summary maps
+ 
+```{r mapSummaries, fig.align = 'center', out.width= "100%"}
+knitr::include_graphics(paste0("../output/6Maps_WHO_Africa_", today, "_.png"))
+```
+
+\newpage
+
+# Section 2: Individual country situations
+&nbsp;
+ 
+&nbsp;
+ 
+
+As of `r format(today, "%d/%m/%Y")`, each panel below shows for each country:  
+&nbsp;
+ 
+* Top row: cumulative reported cases (left) and deaths (right).  
+* Middle row: cumulative reported cases (left) and deaths (right) per 10,000 population on a log10 scale.   
+* Bottom row: weekly ratio of the number of new cases (left) and deaths (right) calculated for each of the past 7 days leading up to `r format(today, "%d/%m/%Y")`. Gaps in the plotted data indicate values that could not be calculated.
+
+Caveats;
+
+* Retrospective changes in reporting policy may cause cumulative deaths/cases counts to drop as described in WHO Sit Rep Number 105, published on 04/05/2020.
+
+
+
+```{r plot_country_data,  fig.height = 10.5, fig.width = 9, fig.align = "center",results = "asis"}
+country_list <- WHO_cases_and_deaths %>% distinct(country) %>% pull(country)
+
+WHO_cases_and_deaths_weekly_ratio$ratio_d[WHO_cases_and_deaths_weekly_ratio$ratio_d == -1] <- NA
+
+for( i in country_list){
+  # add column signifying data related to chosen country
+  current_country_data <- WHO_cases_and_deaths %>% 
+    mutate(current_country = (country == i))
+  
+# add column signifying WR related to chosen country and remove countries with incomplete data and only data within last 8 days
+ current_country_WR_cases <-  WHO_cases_and_deaths_weekly_ratio %>%
+   select(date,country,ratio_c) %>%
+   filter(date > today - 8) %>%
+   mutate(current_country = (country == i)) %>% 
+   group_by(country) %>% 
+   filter(sum(is.finite(ratio_c[8])) == 1) %>%
+   ungroup()
+ 
+ current_country_WR_deaths <-  WHO_cases_and_deaths_weekly_ratio %>%
+   select(date,country,ratio_d) %>%
+   filter(date > today - 8) %>%
+   mutate(current_country = (country == i)) %>% 
+   group_by(country) %>% 
+   filter(sum(is.finite(ratio_d[8])) == 1) %>%
+   ungroup()
+ 
+  
+  # scale graphs according to current country
+  current_country_max_cases <- current_country_data %>% 
+    filter(current_country) %>%
+    pull(cum_cases) %>%
+    max()
+  
+  current_country_max_cases_per_10k <- current_country_data %>% 
+    filter(current_country) %>%
+    pull(cum_cases_per_10k) %>%
+    max()
+  
+  current_country_max_deaths <- current_country_data %>% 
+    filter(current_country) %>%
+    pull(cum_deaths) %>%
+    max()
+  
+  current_country_max_deaths_per_10k <- current_country_data %>% 
+    filter(current_country) %>%
+    pull(cum_deaths_per_10k) %>%
+    max()
+  
+  current_country_max_cases_WR <- current_country_WR_cases %>% 
+    replace_na(list(ratio_c = 0)) %>%
+    filter(current_country) %>%
+    pull(ratio_c) %>%
+    max()
+  
+  current_country_max_deaths_WR <- current_country_WR_deaths %>%
+    replace_na(list(ratio_d = 0)) %>%
+    filter(current_country) %>%
+    pull(ratio_d) %>%
+    max()
+  
+  current_country_min_cases_WR <- current_country_WR_cases %>% 
+    replace_na(list(ratio_c = 0)) %>%
+    filter(current_country) %>%
+    pull(ratio_c) %>%
+    min()
+  
+  current_country_min_deaths_WR <- current_country_WR_deaths %>%
+    replace_na(list(ratio_d = 0)) %>%
+    filter(current_country) %>%
+    pull(ratio_d) %>%
+    min()
+  
+  # plot cases
+  cases_plot <- ggplot() +
+    geom_line(data=current_country_data %>% filter(!current_country),
+              aes(x=date,y=cum_cases,group=country),
+             colour = "lightgray") +
+    geom_line(data=current_country_data %>% filter(current_country),
+              aes(x=date,y=cum_cases,group=NULL),
+              colour="black",size = 0.8) +
+    theme_classic(base_size = 15) + 
+    theme(panel.grid.major.y = element_line(colour = "lightgrey",size=0.02),
+          axis.title.x = element_blank(),
+          plot.title = element_text(hjust = 0.5),
+          axis.text.x = element_text(angle = 60, hjust=1, vjust=0.9)) +
+    labs(title="Cases",y="Cumulative") +
+    scale_x_date(date_labels = "%b %d",breaks=c(today-140,today-112,today-84,today-56,today-28,today)) +
+    coord_cartesian(ylim = c(0,ifelse(current_country_max_cases > 40, current_country_max_cases,40)))
+  
+  # plot deaths
+  deaths_plot <- ggplot() +
+    geom_line(data=current_country_data %>% filter(!current_country),
+              aes(x=date,y=cum_deaths,group=country),
+             colour = "lightgray") +
+    geom_line(data=current_country_data %>% filter(current_country),
+              aes(x=date,y=cum_deaths,group=NULL),
+              colour="black",size = 0.8) +
+    theme_classic(base_size = 15) +
+    theme(panel.grid.major.y = element_line(colour = "lightgrey",size=0.02),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          plot.title = element_text(hjust = 0.5),
+          axis.text.x = element_text(angle = 60, hjust = 1, vjust=0.9)) +
+    labs(title = "Deaths") +
+    scale_x_date(date_labels = "%b %d",breaks=c(today-140,today-112,today-84,today-56,today-28,today)) +
+    coord_cartesian(ylim = c(0,ifelse(current_country_max_deaths > 20, current_country_max_deaths,20)))
+  
+  # plot cases per 10k
+  cases_per_10k_plot <- ggplot() +
+    geom_line(data=current_country_data %>% filter(!current_country,cum_cases_per_10k>0),
+              aes(x=date,y=cum_cases_per_10k,group=country),
+             colour = "lightgray") +
+    geom_line(data=current_country_data %>% filter(current_country,cum_cases_per_10k>0),
+              aes(x=date,y=cum_cases_per_10k,group=NULL),
+              colour="black",size = 0.8) +
+    theme_classic(base_size = 15) + 
+    theme(panel.grid.major.y = element_line(colour = "lightgrey",size=0.02),
+          axis.title.x = element_blank(),
+          axis.text.x = element_text(angle = 60, hjust = 1, vjust=0.9)) +
+    labs(x="Date",y="Cumulative per 10k population") +
+    scale_y_log10(breaks = c(100,10,1,0.1,0.01,0.001,0.0001),labels = c("100","10","1","0.1","0.01","0.001","0.0001")) +
+    scale_x_date(date_labels = "%b %d",breaks=c(today-140,today-112,today-84,today-56,today-28,today)) +
+    coord_cartesian(ylim = c(0.00005,ifelse(current_country_max_cases_per_10k > 0.01, current_country_max_cases_per_10k,0.1)))
+  
+  # plot deaths per 10k
+  deaths_per_10k_plot <- ggplot() +
+    geom_line(data=current_country_data %>% filter(!current_country,cum_deaths_per_10k>0),
+             aes(x=date,y=cum_deaths_per_10k,group=country),
+             colour = "lightgray") +
+    geom_line(data=current_country_data %>% filter(current_country,cum_deaths_per_10k>0),
+              aes(x=date,y=cum_deaths_per_10k,group=NULL),
+              colour="black",size = 0.8) +
+    scale_y_log10(breaks = c(10,1,0.1,0.01,0.001,0.0001),labels = c("10","1","0.1","0.01","0.001","0.0001")) +
+    theme_classic(base_size = 15) +
+    theme(panel.grid.major.y = element_line(colour = "lightgrey",size=0.02),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          axis.text.x = element_text(angle = 60, hjust = 1, vjust=0.9)) +
+    scale_x_date(date_labels = "%b %d",breaks=c(today-140,today-112,today-84,today-56,today-28,today),limits = c(current_country_data %>% distinct(date) %>% pull(date) %>% min(),today))  +
+    coord_cartesian(ylim = c(0.00005,ifelse(current_country_max_deaths_per_10k > 0.01, current_country_max_deaths_per_10k,0.01)))
+ 
+  # plot last 7 cases weekly ratios
+  seven_day_cum_cases <- ggplot() +
+    geom_line(data = current_country_WR_cases %>% filter(!current_country), aes(x=date,y=ratio_c,group = country),colour = "lightgray") +
+    geom_hline(yintercept = 1, colour = "red", alpha = 0.8) +
+    geom_point(data = current_country_WR_cases %>% filter(current_country,date == today), aes(x=date,y=ratio_c,group=NULL),colour="black",size = 0.8) +
+    geom_path(data = current_country_WR_cases %>% filter(current_country), aes(x=date,y=ratio_c,group=NULL),colour="black",size = 0.8) +
+    labs(x="Date", y = "Weekly Ratio") +
+    theme_classic(base_size = 15) +
+    theme(plot.margin = margin(0,20,0,0)) +
+    scale_x_date(date_labels = "%b %d",breaks = c(today - 7, today - 5, today - 2, today)) +
+    coord_cartesian(ylim = c(ifelse(current_country_min_cases_WR >= 0, -0.1, current_country_min_cases_WR),ifelse(current_country_max_cases_WR < 4, 4, current_country_max_cases_WR)),expand = FALSE)
+  
+   # plot last 7 deaths weekly ratios
+  seven_day_cum_deaths <- ggplot() +
+    geom_line(data = current_country_WR_deaths %>% filter(!current_country), aes(x=date,y=ratio_d,group = country),colour="lightgray") +
+    geom_hline(yintercept = 1, colour = "red", alpha = 0.5) +
+    geom_point(data = current_country_WR_deaths %>% filter(current_country,date == today), aes(x=date,y=ratio_d,group=NULL),colour="black",size=1.2) +
+    geom_path(data = current_country_WR_deaths %>% filter(current_country), aes(x=date,y=ratio_d,group=NULL),colour="black",size = 0.8) +
+    labs(x="Date") +
+    theme_classic(base_size = 15) +
+    theme(axis.title.y = element_blank(), plot.margin = margin(0,20,0,0)) +
+    scale_x_date(date_labels = "%b %d",breaks = c(today - 7, today - 5, today - 2, today)) +
+    coord_cartesian(ylim = c(ifelse(current_country_min_deaths_WR >= 0, -0.1, current_country_min_deaths_WR), ifelse(current_country_max_deaths_WR < 4,4, current_country_max_deaths_WR)),expand = FALSE)
+    
+  
+  # combine plots
+  multi_plot <- plot_grid(cases_plot,
+          deaths_plot,
+          cases_per_10k_plot,
+          deaths_per_10k_plot,
+          seven_day_cum_cases,
+          seven_day_cum_deaths,
+          cols = 2,
+          align = "hv")
+  cat("\\begin{figure}[p]")
+  cat(paste0("\\ssubsection{",i,"}"))
+  print(multi_plot)
+  
+  country_summary_text <- country_summary_text_function(i, WHO_latest_day_cases_and_deaths_simulated, WHO_cases_and_deaths_weekly_ratio %>% filter(date == today))
+  
+  cat(paste0(country_summary_text$sentence_1,
+    country_summary_text$sentence_2,
+    country_summary_text$sentence_3,
+    country_summary_text$sentence_4,
+    "\\newpage"))
+  
+cat("\\end{figure}")
+}
+
+```
+
+&nbsp;
+
+
+\newpage
+
+# Appendix
+
+<!-- ## Online Report
+An online version of the report is available  at [https://dimmestp.shinyapps.io/who_africa_app/](https://dimmestp.shinyapps.io/who_africa_app/).
+-->
+
+## Data
+
+### Sources and access
+- Case counts for countries from WHO Coronavirus disease (COVID-2019) Dashboard https://covid19.who.int/table (accessed 2400 `r format(today, "%d/%m/%Y")`).  
+- Death counts for countries from WHO Coronavirus disease (COVID-2019) Dashboard https://covid19.who.int/table (accessed 2400 `r format(today, "%d/%m/%Y")`).  
+- Population counts from the World Bank (2018) https://data.worldbank.org/indicator/SP.POP.TOTL?locations=ZG (accessed 0900  30/03/2020).
+
+
+### Weekly Ratio calculations
+
+ Weekly ratios are calculated by dividing the sum of new cases or deaths over the past 7 days by their respective sums in the 7 days prior.  The higher the weekly ratio, the faster an epidemic is growing. A weekly ratio of 1 represents stable growth (i.e. the number of cases or deaths in the past 7 days was the same as the 7 days before). A value between 1 and 0 indicates that an epidemic is in decline. A value of -1 has been assigned to countries which have removed cases or deaths from their cumulative counts. Doubling times have been replaced by weekly ratios because as countries move out of their exponential growth phases, doubling times become inappropriate and unreliable.
+
+  
+Confidence intervals calculated using bootstrapping of a simulated dataset with Poisson error structure. 
+
+### Caveats
+- Case count data are affected by any changes in testing strategy or testing effort over time and/or any variation in testing strategy or testing effort between regions.  
+- Case count data are likely a substantial under-representation of the true number of COVID-19 infections.  
+- Death data are considered more reliable but may lag behind case data by as much as 3 weeks.
+
+\newpage
+
+
+\section{Extended Data tables}
+
+### Cumulative reported cases
+```{r TabIncidenceRaw, results = 'asis', echo = FALSE}
+# Table produced in the analysis script, as it requires the 95%CI, extracted from the simulations
+
+dat.cumsumraw.df <- 
+  WHO_latest_day_cases_and_deaths_simulated %>%
+  transmute(Country = country,
+            `Cum. reported cases` = last_day_case_obs,
+            `95%CI lower` = last_day_case_ci_low,
+            `95%CI upper` = last_day_case_ci_high) %>%
+  arrange(desc(`Cum. reported cases`))
+
+kable(dat.cumsumraw.df)
+```
+
+\newpage
+
+### Cumulative reported cases per 10,000 population
+
+```{r TabIncidence10k, results = 'asis', echo = FALSE}
+# Table produced in the analysis script, as it requires the 95%CI, extracted from the simulations
+
+dat.cumsum10k.df <- 
+  WHO_latest_day_cases_and_deaths_simulated %>%
+  transmute(Country = country,
+            `Cum. reported cases per 10k pop` = last_day_case_obs_per_10k,
+            `95%CI lower` = last_day_case_ci_low_per_10k,
+            `95%CI upper` = last_day_case_ci_high_per_10k) %>%
+  arrange(desc(`Cum. reported cases per 10k pop`))
+
+kable(dat.cumsum10k.df, digits = 3)
+```
+
+\newpage
+
+### Cumulative deaths
+
+```{r TabDeathsRaw, results = 'asis', echo = FALSE}
+# This does not report CI so directly get it from the data tables
+
+tab.total.deaths<-
+  WHO_latest_day_cases_and_deaths_simulated %>%
+  transmute(Country = country,
+            `Cum. reported deaths` = last_day_deaths_obs,
+            `95%CI lower` = last_day_deaths_ci_low,
+            `95%CI upper` = last_day_deaths_ci_high) %>%
+  arrange(desc(`Cum. reported deaths`))
+
+kable(tab.total.deaths)
+```
+
+\newpage
+
+### Cumulative deaths per 10,000 populations
+
+```{r TabDeaths10k, results = 'asis', echo = FALSE}
+# This does not report CI so directly get it from the data tables
+
+tab.total.deaths.10k<- WHO_latest_day_cases_and_deaths_simulated %>%
+  transmute(Country = country,
+            `Cum. reported deaths per 10k pop` = last_day_deaths_obs_per_10k,
+            `95%CI lower` = last_day_deaths_ci_low_per_10k,
+            `95%CI upper` = last_day_deaths_ci_high_per_10k) %>%
+  arrange(desc(`Cum. reported deaths per 10k pop`))
+
+kable(tab.total.deaths.10k, digits = 3)
+
+```
+
+\newpage
+
+### Weekly Ratio (cases)
+
+<!-- The following two tables summarise the weekly ratios (for cumulative reported cases and deaths respectively) reported in the above figures. Note that a "NA" value notifies countries where no cases/deaths have been reported yet or have if the first cases/deaths occured less than 7 days ago, preventing the computation of weekly ratio over the chosen 7 day period. A "Inf" value notifies countries where cases/deaths have been reported more than 7 days ago but have not increased since, leading to a zero denominator quotient in the weekly ratio calculation. A "Inf" value may appear for the 95% CIs while an estimated weekly ratio is provided. This occurs when the number of cases/deaths is still very low, leading to the common occurence of flat epicurves in the simulated Poisson error bootstrap from which the confidence intervals are estimated. More cases/deaths are required to provide more reliable 95% CIs in those cases. -->
+
+```{r WRTabIncidence, results = 'asis', echo = FALSE}
+WR.report.appendix<- 
+WHO_cases_and_deaths_weekly_ratio %>%
+  ungroup() %>%
+  filter(date == today) %>%
+  transmute(Country = country,
+         `Weekly Ratio` = ratio_c,
+         `95%CI lower` = lci_c,
+         `95%CI upper` = uci_c) %>%
+  arrange(desc(`Weekly Ratio`))
+
+WR.report.appendix$`Weekly Ratio`[is.infinite(WR.report.appendix$`Weekly Ratio`)] <- NA
+
+
+kable(WR.report.appendix, row.names = FALSE, digits = 3)
+```
+
+\newpage
+
+### Weekly Ratio (deaths)
+```{r DtTabDeaths, results = 'asis', echo = FALSE}
+
+WR.report.appendix.deaths<- 
+WHO_cases_and_deaths_weekly_ratio %>%
+  ungroup() %>%
+  filter(date == today) %>%
+  transmute(Country = country,
+         `Weekly Ratio` = ratio_d,
+         `95%CI lower` = lci_d,
+         `95%CI upper` = uci_d) %>%
+  arrange(desc(`Weekly Ratio`))
+
+WR.report.appendix.deaths$`Weekly Ratio`[is.infinite(WR.report.appendix.deaths$`Weekly Ratio`)] <- NA
+
+kable(WR.report.appendix.deaths, row.names = FALSE, digits = 3)
+
+```
+
+
+
+
+
+
+
+

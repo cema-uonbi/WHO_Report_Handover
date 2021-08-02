@@ -1,0 +1,48 @@
+"","Country","Cum. reported deaths","95%CI lower","95%CI upper"
+"1","South Africa",15953,15759,16166
+"2","Algeria",1672,NA,NA
+"3","Nigeria",1098,1046,1155
+"4","Ethiopia",1096,1041,1151
+"5","Kenya",648,605,692
+"6","Cameroon",416,384,450
+"7","Zambia",330,301,358
+"8","Senegal",302,273,332
+"9","Ghana",297,269,325
+"10","Democratic Republic of the Congo",271,243,296
+"11","Zimbabwe",225,NA,NA
+"12","Madagascar",223,200,248
+"13","Malawi",179,158,201
+"14","Mauritania",161,142,182
+"15","Angola",152,134,171
+"16","Mali",128,111,147
+"17","Cote d'Ivoire",120,103,139
+"18","Namibia",112,NA,NA
+"19","Gambia",108,91,126
+"20","Eswatini",104,NA,NA
+"21","Congo",89,NA,NA
+"22","Equatorial Guinea",83,69,98
+"23","Liberia",82,68,98
+"24","Chad",81,67,97
+"25","Sierra Leone",72,58,84
+"26","Niger",69,56,82
+"27","Guinea",64,NA,NA
+"28","Uganda",63,49,75
+"29","Central African Republic",62,49,75
+"30","Burkina Faso",56,NA,NA
+"31","Gabon",53,42,66
+"32","Cabo Verde",51,38,63
+"33","South Sudan",49,NA,NA
+"34","Mozambique",43,33,54
+"35","Togo",41,31,52
+"36","Benin",40,30,51
+"37","Guinea-Bissau",39,30,49
+"38","Lesotho",33,24,42
+"39","Rwanda",26,19,34
+"40","United Republic of Tanzania",21,14,29
+"41","Sao Tome and Principe",15,NA,NA
+"42","Botswana",13,7,19
+"43","Mauritius",10,6,16
+"44","Comoros",7,3,12
+"45","Burundi",1,0,3
+"46","Eritrea",0,0,0
+"47","Seychelles",0,0,0

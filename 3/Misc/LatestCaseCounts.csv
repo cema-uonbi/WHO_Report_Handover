@@ -1,0 +1,48 @@
+"","Country","Cum. reported cases","95%CI lower","95%CI upper"
+"1","South Africa",661211,659894,662512
+"2","Ethiopia",68820,NA,NA
+"3","Nigeria",57242,56861,57663
+"4","Algeria",49826,49494,50174
+"5","Ghana",46004,45656,46357
+"6","Kenya",36981,36660,37294
+"7","Cameroon",20598,20370,20837
+"8","Cote d'Ivoire",19269,19038,19496
+"9","Madagascar",16053,NA,NA
+"10","Senegal",14714,14511,14914
+"11","Zambia",14131,NA,NA
+"12","Democratic Republic of the Congo",10514,10342,10671
+"13","Namibia",10377,NA,NA
+"14","Guinea",10325,NA,NA
+"15","Gabon",8696,8543,8854
+"16","Zimbabwe",7683,7545,7846
+"17","Mauritania",7368,NA,NA
+"18","Mozambique",6771,6631,6903
+"19","Uganda",6287,NA,NA
+"20","Malawi",5731,5605,5859
+"21","Eswatini",5269,NA,NA
+"22","Cabo Verde",5257,5139,5384
+"23","Congo",5002,4887,5121
+"24","Equatorial Guinea",5002,NA,NA
+"25","Central African Republic",4793,NA,NA
+"26","Rwanda",4711,4600,4825
+"27","Angola",3991,3894,4097
+"28","Gambia",3526,NA,NA
+"29","Mali",3013,2923,3104
+"30","South Sudan",2649,2561,2735
+"31","Botswana",2567,2482,2648
+"32","Guinea-Bissau",2303,2219,2381
+"33","Benin",2280,NA,NA
+"34","Sierra Leone",2168,2091,2242
+"35","Burkina Faso",1816,1744,1888
+"36","Togo",1666,1602,1732
+"37","Lesotho",1390,1331,1448
+"38","Liberia",1336,NA,NA
+"39","Niger",1183,NA,NA
+"40","Chad",1151,NA,NA
+"41","Sao Tome and Principe",908,NA,NA
+"42","United Republic of Tanzania",509,472,547
+"43","Burundi",474,438,510
+"44","Comoros",470,436,504
+"45","Mauritius",367,333,399
+"46","Eritrea",364,333,396
+"47","Seychelles",139,NA,NA
