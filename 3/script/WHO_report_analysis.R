@@ -5,10 +5,12 @@
 
 # 1) SET UP ----
 
-setwd("~/OneDrive - University of Edinburgh/GitRepos/WHO_covid19_report")
+setwd("~/Dropbox/CEMA_GitHub/WHO_Report_Handover/3")
+data <- read.csv("https://covid19.who.int/WHO-COVID-19-global-data.csv") %>%
+  mutate(Date_reported=as.Date(Date_reported, format = "%Y-%m-%d"))
 
-
-today<- Sys.Date()-1 # Set date as to that of the data to fetch.
+today<- max(data$Date_reported)
+#today<- Sys.Date()-1 # Set date as to that of the data to fetch.
 
 iter = 1000 # Number of iterations for the poisson error simulation (bootstrap), Set to 1000. Or 10 for a quick test.
 set.seed(as.numeric(today)) # setting seed allows repeatability of poisson error simulations. Use the date as a reference point for the seed.
@@ -54,11 +56,10 @@ who_country_aliases_and_populations<-
 
 
 ## Download data from https://covid19.who.int/table and read it in
-data <- 
-  read.csv(paste0('./data/', today, '/WHO-COVID-19-global-data.csv'), stringsAsFactors = FALSE) %>%
-  rename(Date_reported=Date_reported) %>%
+data <- read.csv("https://covid19.who.int/WHO-COVID-19-global-data.csv") %>%
+  #rename(Date_reported=Date_reported) %>%
   mutate(Date_reported=as.Date(Date_reported, format = "%Y-%m-%d"))
-
+today<- max(data$Date_reported)
 ## Extract data for WHO AFRO
 africa_data <- 
   data[which(data$WHO_region == 'AFRO'& !(data$Country == "Réunion") & !(data$Country == "Mayotte")),] %>%## we didn't include the two territories before
@@ -128,7 +129,7 @@ text(44, -48,paste0(WHO_cases_and_deaths %>% filter(date == today) %>% pull(cum_
    rename('rolling'='sum')
  smoothCounts$index <- '1'
  
- break.vec <- seq(from = as.Date("2020-02-25"), to = Sys.Date()-1,  
+ break.vec <- seq(from = as.Date("2020-02-25"), to = today,  
                   by = "2 months")
  p_case <- ggplot() +
    geom_bar(data=new_case, aes(x=date, y=sum),stat="identity", position=position_dodge(),colour = 'grey')+
@@ -340,7 +341,7 @@ palredgreen <- brewer.pal(groups_less_than_one, name = "Greens")
 palredgreen <- c(rev(palredgreen)[1:groups_less_than_one],brewer.pal(7 - groups_less_than_one, name = "Reds"))
 palredgreen<-c("#FFFFFF",palredgreen)
 breaks <- c(0,breaks)
-png(filename = paste0('./output/Map_WR_cases_', today, '_.png'), width=1920, height=1240, pointsize = 22)
+png(filename = paste0('output/Map_WR_cases_', today, '_.png'), width=1920, height=1240, pointsize = 22)
 choroLayer(spdf = africa, var = "WR_cases", colNA = "grey", legend.nodata = "Non WHO Afro country",
            breaks=breaks, col=palredgreen, legend.title.txt = "Ratio", legend.title.cex = 1, 
            legend.values.cex = 1, legend.values.rnd = 3, legend.pos = c(-30,-35))
@@ -365,7 +366,7 @@ palredgreen <- brewer.pal(groups_less_than_one, name = "Greens")
 palredgreen <- c(rev(palredgreen)[1:groups_less_than_one],brewer.pal(4 - groups_less_than_one, name = "Reds"))
 palredgreen<-c("#FFFFFF",palredgreen)
 breaks <- c(0,breaks)
-png(filename = paste0('./output/Map_WR_deaths_', today, '_.png'), width=1920, height=1240, pointsize = 22)
+png(filename = paste0('output/Map_WR_deaths_', today, '_.png'), width=1920, height=1240, pointsize = 22)
 choroLayer(spdf = africa, var = "WR_deaths", colNA = "grey", legend.nodata = "Non WHO Afro country",
            breaks=breaks, col=palredgreen,legend.title.txt = "Ratio", legend.title.cex = 1, 
            legend.values.cex = 1, legend.values.rnd = 3, legend.pos = c(-30,-35))
@@ -379,12 +380,12 @@ dev.off()
 # crop images and create 3x6 plot
 # This assumes images are 1920x1240, will centre-crop to 1080x960 
 #Read images
-image1 <- image_read(paste0("./output/Map_cum_cases_", today, "_.png"))
-image2 <- image_read(paste0("./output/Map_cases_10k_pop_", today, "_.png"))
-image3 <- image_read(paste0("./output/Map_cum_deaths_", today, "_.png"))
-image4 <- image_read(paste0("./output/Map_deaths_10k_pop_", today, "_.png"))
-image5 <- image_read(paste0("./output/Map_WR_cases_", today, "_.png"))
-image6 <- image_read(paste0("./output/Map_WR_deaths_", today, "_.png"))
+image1 <- image_read(paste0("output/Map_cum_cases_", today, "_.png"))
+image2 <- image_read(paste0("output/Map_cases_10k_pop_", today, "_.png"))
+image3 <- image_read(paste0("output/Map_cum_deaths_", today, "_.png"))
+image4 <- image_read(paste0("output/Map_deaths_10k_pop_", today, "_.png"))
+image5 <- image_read(paste0("output/Map_WR_cases_", today, "_.png"))
+image6 <- image_read(paste0("output/Map_WR_deaths_", today, "_.png"))
 
 #Crop images
 image1_crop <- image_crop(image1, "1080x960+420+140")

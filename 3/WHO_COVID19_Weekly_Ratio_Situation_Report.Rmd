@@ -26,7 +26,7 @@ extra_dependencies: float
 
 \addtolength{\headheight}{1cm}
 \pagestyle{fancyplain}
-\rhead{\includegraphics[width=0.2\textwidth]{../input_files/tiba_logo}}
+\rhead{\includegraphics[width=0.2\textwidth]{input_files/tiba_logo}}
 \lhead{}
 \renewcommand{\headrulewidth}{0pt}
 
@@ -39,8 +39,12 @@ knitr::opts_chunk$set(warning = FALSE)
 knitr::opts_chunk$set(tidy = TRUE)
 knitr::opts_chunk$set(message=FALSE)
 
-
-today <- Sys.Date()
+library(tidyverse)
+data <- read.csv("https://covid19.who.int/WHO-COVID-19-global-data.csv") %>%
+  #rename(Date_reported=Date_reported) %>%
+  mutate(Date_reported=as.Date(Date_reported, format = "%Y-%m-%d"))
+today<- max(data$Date_reported)
+#today <- Sys.Date()-1
 library(plyr)
 library(knitr)
 library(kableExtra)
@@ -49,15 +53,15 @@ library(ggplot2)
 library(cowplot)
 library(toOrdinal)
 library(tidyverse)
-load(paste0('../output/WHO_report_analysis_', as.character(today), '.RData'))
-source('../script/sourced_functions_Weekly_Ratio_reports.R')
+load(paste0('output/WHO_report_analysis_', as.character(today), '.RData'))
+source('script/sourced_functions_Weekly_Ratio_reports.R')
 
 
 ```
 &nbsp;
 &nbsp;
 ```{r map, fig.align = 'center', out.width= "100%"}
-knitr::include_graphics("../input_files/covid-19_africa_map.png")
+knitr::include_graphics("input_files/covid-19_africa_map.png")
 ```
 
 \newpage
@@ -86,14 +90,14 @@ knitr::include_graphics("../input_files/covid-19_africa_map.png")
 ## Overview
  
 ```{r mapWHO, fig.align = 'center', out.width= "80%"}
-knitr::include_graphics("../input_files/WHO_Africa3.png")
+knitr::include_graphics("input_files/WHO_Africa3.png")
 ```
 &nbsp;
  
 &nbsp;
 
 ```{r mapWHOepicurve,,fig.align='center', out.width= "90%"}
-knitr::include_graphics("../input_files/WHO_Africa_epicurve.png")
+knitr::include_graphics("input_files/WHO_Africa_epicurve.png")
 ```
 
 \newpage
@@ -122,7 +126,7 @@ Caveats:
 ## Summary maps
  
 ```{r mapSummaries, fig.align = 'center', out.width= "100%"}
-knitr::include_graphics(paste0("../output/6Maps_WHO_Africa_", today, "_.png"))
+knitr::include_graphics(paste0("output/6Maps_WHO_Africa_", today, "_.png"))
 ```
 
 \newpage
